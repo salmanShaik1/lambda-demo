@@ -4,25 +4,18 @@ phases:
     runtime-versions:
       python: 3.9
     commands:
-      - echo "Installing dependencies...."
+      - echo "Installing dependencies..."
       - pip install -r requirements.txt -t lib
-      - echo "Listing files in 'lib' directory"
-      - ls -al lib  # List all files in the lib directory to check if the dependencies are installed
   build:
     commands:
       - echo "Zipping deployment package..."
       - cd lib
-      - echo "Current directory: $(pwd)"  # Print the current directory to verify correct location
-      - echo "Listing files in 'lib' directory"
-      - ls -al  # List files in lib folder
-      - zip -r9 ../deployment_package.zip *  # Zip the contents of lib directory
+      - zip -r9 ../deployment_package.zip *
       - cd ..
       - zip -g deployment_package.zip lambda_function.py
-      - ls -l deployment_package.zip  # List details of deployment_package.zip
   post_build:
     commands:
       - echo "Uploading to S3..."
-      - ls -l deployment_package.zip  # Confirm that the zip file exists before uploading
       - aws s3 cp deployment_package.zip s3://lambda-builds-zip/
       - echo "Updating Lambda function via S3..."
       - aws lambda update-function-code --function-name code-build --s3-bucket lambda-builds-zip --s3-key deployment_package.zip
